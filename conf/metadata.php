@@ -6,5 +6,6 @@
  */
 
 
-//$meta['fixme'] = array('string');
+$meta['index'] = array('string');
+$meta['document_root'] = array('string');
 

@@ -5,4 +5,5 @@
  * @author Michal Koutný <michal@fykos.cz>
  */
 
-//$conf['fixme']    = 'FIXME';
+$conf['index']            = 'index.php';
+$conf['document_root']    = null;

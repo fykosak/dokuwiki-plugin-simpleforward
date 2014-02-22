@@ -1,13 +1,14 @@
 <?php
+
 /**
  * DokuWiki Plugin simpleforward (Action Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Michal Koutný <michal@fykos.cz>
  */
-
 // must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
+if (!defined('DOKU_INC'))
+    die();
 
 class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
 
@@ -19,8 +20,7 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
      */
     public function register(Doku_Event_Handler $controller) {
 
-       $controller->register_hook('DOKUWIKI_STARTED', 'FIXME', $this, 'handle_dokuwiki_started');
-   
+        $controller->register_hook('DOKUWIKI_STARTED', 'AFTER', $this, 'handle_dokuwiki_started');
     }
 
     /**
@@ -31,8 +31,57 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
      *                           handler was registered]
      * @return void
      */
-
     public function handle_dokuwiki_started(Doku_Event &$event, $param) {
+        global $INFO;
+        if (!$INFO['exists']) {
+            $basedir = $this->getConf('document_root');
+            $index = $basedir . DIRECTORY_SEPARATOR . $this->getConf('index');
+            if (!$basedir || !file_exists($index)) {
+                return;
+            }
+
+            $ru = $_SERVER['REQUEST_URI'];
+            $url = "http://dummy.org$ru";
+            $urlParts = parse_url($url);
+            $path = $urlParts['path'];
+            $file = $basedir . DIRECTORY_SEPARATOR . $path;
+            unset($_GET['id']);
+
+            if (file_exists($file)) {
+                if (strtolower(substr($path, -4)) == '.php') {
+                    $this->forward_request($file);
+                } else {
+                    $this->send_file($file);
+                }
+            } else {
+                $this->forward_request($index);
+            }
+        }
+    }
+
+    private function send_file($file) {
+        static $content = array(
+    'css' => 'text/css',
+        );
+        $ext = strtolower(substr($file, strrpos($file, '.') + 1));
+        if (isset($content[$ext])) {
+            $type = $content[$ext];
+        } else {
+            $type = mime_content_type($file);
+        }
+
+        header('Content-Type: ' . $type);
+        header('Content-Length: ' . filesize($file));
+        ob_clean();
+        flush();
+        readfile($file);
+        exit;
+    }
+
+    private function forward_request($file) {
+        @session_write_close();
+        require $file;
+        exit;
     }
 
 }
