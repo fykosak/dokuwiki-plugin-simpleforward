@@ -1,5 +1,5 @@
 base   simpleforward
-author Michal Koutný
+author Michal KoutnÃ½
 email  michal@fykos.cz
 date   2014-02-22
 name   simpleforward plugin
