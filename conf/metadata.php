@@ -6,6 +6,7 @@
  */
 
 
-$meta['index'] = array('string');
 $meta['document_root'] = array('string');
+$meta['enabled'] = array('onoff');
+$meta['index'] = array('string');
 

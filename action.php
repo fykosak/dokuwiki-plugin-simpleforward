@@ -33,7 +33,7 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
      */
     public function handle_dokuwiki_started(Doku_Event &$event, $param) {
         global $INFO;
-        if (!$INFO['exists']) {
+        if (!$INFO['exists'] && $this->getConf('enabled')) {
             $basedir = $this->getConf('document_root');
             $index = $basedir . DIRECTORY_SEPARATOR . $this->getConf('index');
             if (!$basedir || !file_exists($index)) {
@@ -47,7 +47,7 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
             $file = $basedir . DIRECTORY_SEPARATOR . $path;
             unset($_GET['id']);
 
-            if (file_exists($file)) {
+            if (is_file($file)) {
                 if (strtolower(substr($path, -4)) == '.php') {
                     $this->forward_request($file);
                 } else {

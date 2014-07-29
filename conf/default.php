@@ -5,5 +5,6 @@
  * @author Michal Koutný <michal@fykos.cz>
  */
 
-$conf['index']            = 'index.php';
 $conf['document_root']    = null;
+$conf['enabled']          = false;
+$conf['index']            = 'index.php';
