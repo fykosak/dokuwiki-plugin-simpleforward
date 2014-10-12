@@ -33,7 +33,14 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
      */
     public function handle_dokuwiki_started(Doku_Event &$event, $param) {
         global $INFO;
-        if (!$INFO['exists'] && $this->getConf('enabled')) {
+        global $ID;
+        global $conf;
+        $disableForward = 
+                !$this->getConf('enabled') /* Disabled by user */
+                || $_GET['dokuwiki_simpleforward'] === '0' /* Disabled for the request */
+                || ($_SERVER['REQUEST_URI'] !== DOKU_BASE && $ID === $conf['start']); /* Default page is not forwarded due to form actions */
+        
+        if (!$INFO['exists'] && !$disableForward) {
             $basedir = $this->getConf('document_root');
             $index = $basedir . DIRECTORY_SEPARATOR . $this->getConf('index');
             if (!$basedir || !file_exists($index)) {
