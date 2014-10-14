@@ -4,4 +4,4 @@ email  michal@fykos.cz
 date   2014-02-22
 name   simpleforward plugin
 desc   Forwards non-existent pages to another local website.
-url    http://git@fykos.cz:dokuwiki/plugin-simpleforward.git
+url    https://www.dokuwiki.org/plugin:simpleforward
