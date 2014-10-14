@@ -35,11 +35,9 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
         global $INFO;
         global $ID;
         global $conf;
-        $disableForward = 
-                !$this->getConf('enabled') /* Disabled by user */
-                || $_GET['dokuwiki_simpleforward'] === '0' /* Disabled for the request */
-                || ($_SERVER['REQUEST_URI'] !== DOKU_BASE && $ID === $conf['start']); /* Default page is not forwarded due to form actions */
-        
+        $disableForward =
+                !$this->getConf('enabled') /* Disabled by user */ || $_GET['dokuwiki_simpleforward'] === '0' /* Disabled for the request */ || ($this->nonemptyPath() && $ID === $conf['start']); /* Default page is not forwarded due to form actions */
+
         if (!$INFO['exists'] && !$disableForward) {
             $basedir = $this->getConf('document_root');
             $index = $basedir . DIRECTORY_SEPARATOR . $this->getConf('index');
@@ -89,6 +87,11 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
         @session_write_close();
         require $file;
         exit;
+    }
+
+    private function nonemptyPath() {
+        $parts = explode('?', $_SERVER['REQUEST_URI'], 2);
+        return $parts[0] !== DOKU_BASE;
     }
 
 }
