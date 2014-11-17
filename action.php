@@ -32,41 +32,53 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
      * @return void
      */
     public function handle_dokuwiki_started(Doku_Event &$event, $param) {
-        global $INFO;
+        global $ACT;
         global $ID;
+        global $INFO;
+
+
         global $conf;
-        $disableForward =
-                !$this->getConf('enabled') /* Disabled by user */ || $_GET['dokuwiki_simpleforward'] === '0' /* Disabled for the request */ || ($this->nonemptyPath() && $ID === $conf['start']); /* Default page is not forwarded due to form actions */
+        /* Disabled by user */
+        $disableForward = !$this->getConf('enabled');
+        /* Disabled for the request */
+        $disableForward = $disableForward || $_GET['dokuwiki_simpleforward'] === '0';
+        /* Default page is not forwarded due to form actions */
+        $disableForward = $disableForward || ($this->nonemptyPath() && $ID === $conf['start']);
+        /* Dokuwiki uses 'id' as query parameter of searches 
+         * (Those are probably nonexistent pages, prefer display the search results.) */
+        $disableForward = $disableForward || ($ACT === 'search');
 
-        if (!$INFO['exists'] && !$disableForward) {
-            $basedir = $this->getConf('document_root');
-            $index = $basedir . DIRECTORY_SEPARATOR . $this->getConf('index');
-            if (!$basedir || !file_exists($index)) {
-                return;
-            }
+        if ($INFO['exists'] || $disableForward) {
+            return;
+        }
 
-            $ru = $_SERVER['REQUEST_URI'];
-            $url = "http://dummy.org$ru";
-            $urlParts = parse_url($url);
-            $path = $urlParts['path'];
-            $file = $basedir . DIRECTORY_SEPARATOR . $path;
-            unset($_GET['id']);
+        $basedir = $this->getConf('document_root');
+        $index = $basedir . DIRECTORY_SEPARATOR . $this->getConf('index');
+        if (!$basedir || !file_exists($index)) {
+            return;
+        }
 
-            if (is_file($file)) {
-                if (strtolower(substr($path, -4)) == '.php') {
-                    $this->forward_request($file);
-                } else {
-                    $this->send_file($file);
-                }
+        $ru = $_SERVER['REQUEST_URI'];
+        $url = "http://dummy.org$ru";
+        $urlParts = parse_url($url);
+        $path = $urlParts['path'];
+        $file = $basedir . DIRECTORY_SEPARATOR . $path;
+        unset($_GET['id']);
+
+        if (is_file($file)) {
+            if (strtolower(substr($path, -4)) == '.php') {
+                $this->forward_request($file);
             } else {
-                $this->forward_request($index);
+                $this->send_file($file);
             }
+        } else {
+            $this->forward_request($index);
         }
     }
 
     private function send_file($file) {
         static $content = array(
-    'css' => 'text/css',
+            'css' => 'text/css',
         );
         $ext = strtolower(substr($file, strrpos($file, '.') + 1));
         if (isset($content[$ext])) {
