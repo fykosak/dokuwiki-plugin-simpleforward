@@ -58,11 +58,13 @@ class action_plugin_simpleforward extends DokuWiki_Action_Plugin {
             return;
         }
 
+        /* Obtain filename from REQUEST_URI (note it's URL encoded) */
         $ru = $_SERVER['REQUEST_URI'];
         $url = "http://dummy.org$ru";
         $urlParts = parse_url($url);
-        $path = $urlParts['path'];
+        $path = rawurldecode($urlParts['path']);
         $file = $basedir . DIRECTORY_SEPARATOR . $path;
+
         unset($_GET['id']);
 
         if (is_file($file)) {
